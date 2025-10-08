@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfoFetch - Number Information Lookup</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            overflow-x: hidden;
+            color: #fff;
+            background: #0f0f1e;
+        }
+
+        #three-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: #6c63ff;
+        }
+
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #6c63ff, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #6c63ff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #6c63ff;
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .hero h2 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #6c63ff, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            color: #b8b8b8;
+            line-height: 1.6;
+        }
+
+        .search-box {
+            display: flex;
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 15px 25px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-box button {
+            padding: 15px 30px;
+            background: linear-gradient(90deg, #6c63ff, #ff6b6b);
+            border: none;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-box button:hover {
+            background: linear-gradient(90deg, #5a52d5, #e05a5a);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 80px 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s, background 0.3s;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #6c63ff, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            color: #b8b8b8;
+            line-height: 1.6;
+        }
+
+        .data-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 50px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .data-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .data-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .data-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .data-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 10px 0;
+            background: linear-gradient(90deg, #6c63ff, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .data-label {
+            color: #b8b8b8;
+            font-size: 1rem;
+        }
+
+        .admin-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 50px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .admin-panel h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .admin-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #6c63ff;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #6c63ff, #ff6b6b);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .contact-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 50px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .contact-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .contact-info {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .contact-info p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .telegram-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(90deg, #0088cc, #00a8ff);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .telegram-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 136, 204, 0.3);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #b8b8b8;
+        }
+
+        .developer-link {
+            color: #6c63ff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .developer-link:hover {
+            color: #ff6b6b;
+            text-decoration: underline;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transform: translateX(150%);
+            transition: transform 0.5s;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #6c63ff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h2 {
+                font-size: 2.5rem;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="three-bg"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-database"></i>
+                <h1>InfoFetch</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="active">Home</a>
+                <a href="#" id="admin-link">Admin Panel</a>
+                <a href="#" id="contact-link">Contact Us</a>
+                <a href="#">Documentation</a>
+            </div>
+        </header>
+        
+        <section class="hero">
+            <h2>Get Information from Any Number</h2>
+            <p>Enter any phone number to get detailed information including carrier, location, and more using our advanced API.</p>
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Enter phone number (e.g., 7676162652)">
+                <button id="search-btn">Fetch Information</button>
+            </div>
+        </section>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Fetching data from API...</p>
+        </div>
+        
+        <section class="features">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3>Lightning Fast</h3>
+                <p>Get real-time number information with our optimized API connections.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Secure & Reliable</h3>
+                <p>Your queries are protected with enterprise-grade security protocols.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-sliders-h"></i>
+                </div>
+                <h3>Fully Customizable</h3>
+                <p>Easily configure API endpoints through our admin panel.</p>
+            </div>
+        </section>
+        
+        <section class="data-section">
+            <h2>Number Information Results</h2>
+            <div class="data-container" id="data-container">
+                <!-- Data cards will be dynamically generated here -->
+                <div class="data-card" style="grid-column: 1 / -1; text-align: center;">
+                    <div class="data-value">Enter a number to search</div>
+                    <div class="data-label">Results will appear here</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="admin-panel" id="admin-panel">
+            <h2>Admin Configuration</h2>
+            <div class="admin-form">
+                <div class="form-group">
+                    <label for="api-url">API Endpoint URL</label>
+                    <input type="text" id="api-url" placeholder="https://yahu.site/api/">
+                </div>
+                <div class="form-group">
+                    <label for="api-key">API Key</label>
+                    <input type="text" id="api-key" placeholder="The_ajay">
+                </div>
+                <div class="form-group">
+                    <label for="api-param">Number Parameter Name</label>
+                    <input type="text" id="api-param" value="number" placeholder="Parameter name for number">
+                </div>
+                <div class="form-group">
+                    <label for="api-key-param">API Key Parameter Name</label>
+                    <input type="text" id="api-key-param" value="key" placeholder="Parameter name for API key">
+                </div>
+                <div class="admin-actions">
+                    <button class="btn btn-primary" id="save-config">Save Configuration</button>
+                    <button class="btn btn-secondary" id="test-api">Test API</button>
+                    <button class="btn btn-secondary" id="reset-defaults">Reset to Defaults</button>
+                </div>
+            </div>
+        </section>
+        
+        <section class="contact-section" id="contact-section">
+            <h2>Contact Us</h2>
+            <div class="contact-info">
+                <p>For any queries or support, contact us on Telegram:</p>
+                <a href="https://t.me/7320805030" class="telegram-link" target="_blank">
+                    <i class="fab fa-telegram"></i>
+                    Telegram: @7320805030
+                </a>
+            </div>
+        </section>
+        
+        <footer>
+            <p>&copy; 2023 InfoFetch. All rights reserved. | 
+                <a href="https://www.youtube.com/" class="developer-link" target="_blank">Developer: Unknown</a>
+            </p>
+        </footer>
+    </div>
+    
+    <div class="notification" id="notification">
+        <span id="notification-text">Settings saved successfully!</span>
+    </div>
+
+    <script>
+        // Three.js 3D Background
+        function initThreeBackground() {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('three-bg').appendChild(renderer.domElement);
+
+            // Create particles
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 5000;
+            
+            const posArray = new Float32Array(particlesCount * 3);
+            
+            for(let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 10;
+            }
+            
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            
+            // Material
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.005,
+                color: 0x6c63ff
+            });
+            
+            // Mesh
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+            
+            camera.position.z = 2;
+            
+            // Mouse movement effect
+            let mouseX = 0;
+            let mouseY = 0;
+            
+            document.addEventListener('mousemove', (event) => {
+                mouseX = event.clientX / window.innerWidth - 0.5;
+                mouseY = event.clientY / window.innerHeight - 0.5;
+            });
+            
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                particlesMesh.rotation.x += 0.0005;
+                particlesMesh.rotation.y += 0.001;
+                
+                // Add subtle movement based on mouse position
+                particlesMesh.rotation.x += mouseY * 0.0005;
+                particlesMesh.rotation.y += mouseX * 0.0005;
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // Initialize 3D background
+        initThreeBackground();
+
+        // Navigation Toggle
+        document.getElementById('admin-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            const adminPanel = document.getElementById('admin-panel');
+            const contactSection = document.getElementById('contact-section');
+            
+            contactSection.style.display = 'none';
+            
+            if (adminPanel.style.display === 'block') {
+                adminPanel.style.display = 'none';
+            } else {
+                adminPanel.style.display = 'block';
+                window.scrollTo({ top: adminPanel.offsetTop - 100, behavior: 'smooth' });
+            }
+        });
+
+        document.getElementById('contact-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            const adminPanel = document.getElementById('admin-panel');
+            const contactSection = document.getElementById('contact-section');
+            
+            adminPanel.style.display = 'none';
+            
+            if (contactSection.style.display === 'block') {
+                contactSection.style.display = 'none';
+            } else {
+                contactSection.style.display = 'block';
+                window.scrollTo({ top: contactSection.offsetTop - 100, behavior: 'smooth' });
+            }
+        });
+
+        // Notification System
+        function showNotification(message, duration = 3000) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, duration);
+        }
+
+        // API Configuration
+        let apiConfig = {
+            url: 'https://yahu.site/api/',
+            key: 'The_ajay',
+            numberParam: 'number',
+            keyParam: 'key'
+        };
+
+        // Load configuration from localStorage
+        function loadConfig() {
+            const savedConfig = localStorage.getItem('apiConfig');
+            if (savedConfig) {
+                apiConfig = JSON.parse(savedConfig);
+                document.getElementById('api-url').value = apiConfig.url;
+                document.getElementById('api-key').value = apiConfig.key;
+                document.getElementById('api-param').value = apiConfig.numberParam;
+                document.getElementById('api-key-param').value = apiConfig.keyParam;
+            }
+        }
+
+        // Save configuration
+        document.getElementById('save-config').addEventListener('click', function() {
+            apiConfig.url = document.getElementById('api-url').value;
+            apiConfig.key = document.getElementById('api-key').value;
+            apiConfig.numberParam = document.getElementById('api-param').value;
+            apiConfig.keyParam = document.getElementById('api-key-param').value;
+            
+            localStorage.setItem('apiConfig', JSON.stringify(apiConfig));
+            showNotification('API configuration saved successfully!');
+        });
+
+        // Test API
+        document.getElementById('test-api').addEventListener('click', function() {
+            showNotification('Testing API connection...');
+            
+            // Simple test with a sample number
+            const testUrl = `${apiConfig.url}?${apiConfig.numberParam}=7676162652&${apiConfig.keyParam}=${apiConfig.key}`;
+            
+            fetch(testUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('API test failed');
+                    return response.json();
+                })
+                .then(data => {
+                    showNotification('API connection successful!');
+                })
+                .catch(error => {
+                    showNotification('API test failed. Check your configuration.', 5000);
+                });
+        });
+
+        // Reset to defaults
+        document.getElementById('reset-defaults').addEventListener('click', function() {
+            apiConfig = {
+                url: 'https://yahu.site/api/',
+                key: 'The_ajay',
+                numberParam: 'number',
+                keyParam: 'key'
+            };
+            
+            document.getElementById('api-url').value = apiConfig.url;
+            document.getElementById('api-key').value = apiConfig.key;
+            document.getElementById('api-param').value = apiConfig.numberParam;
+            document.getElementById('api-key-param').value = apiConfig.keyParam;
+            
+            showNotification('Configuration reset to defaults');
+        });
+
+        // Fetch data from API
+        async function fetchNumberInfo(number) {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+            
+            try {
+                const apiUrl = `${apiConfig.url}?${apiConfig.numberParam}=${number}&${apiConfig.keyParam}=${apiConfig.key}`;
+                
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                displayNumberData(data, number);
+                
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                showNotification('Error fetching data from API. Using sample data.', 5000);
+                
+                // Fallback to sample data if API fails
+                displaySampleData(number);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Display actual API data
+        function displayNumberData(data, number) {
+            const container = document.getElementById('data-container');
+            container.innerHTML = '';
+            
+            // Check if data is in expected format, if not try to adapt
+            if (typeof data === 'object' && data !== null) {
+                // If data is an object, display its properties
+                Object.keys(data).forEach(key => {
+                    const card = document.createElement('div');
+                    card.className = 'data-card';
+                    card.innerHTML = `
+                        <div class="data-value">${data[key]}</div>
+                        <div class="data-label">${formatKey(key)}</div>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                // If data is a simple value
+                const card = document.createElement('div');
+                card.className = 'data-card';
+                card.innerHTML = `
+                    <div class="data-value">${data}</div>
+                    <div class="data-label">Information for ${number}</div>
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        // Format object keys for display
+        function formatKey(key) {
+            return key
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/^./, str => str.toUpperCase())
+                .replace(/_/g, ' ');
+        }
+
+        // Display sample data (fallback)
+        function displaySampleData(number) {
+            const container = document.getElementById('data-container');
+            container.innerHTML = '';
+            
+            const sampleData = [
+                { label: 'Phone Number', value: number },
+                { label: 'Carrier', value: 'Jio' },
+                { label: 'Location', value: 'Mumbai, Maharashtra' },
+                { label: 'Number Type', value: 'Mobile' },
+                { label: 'Active Status', value: 'Active' },
+                { label: 'Caller ID', value: 'Available' }
+            ];
+            
+            sampleData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'data-card';
+                card.innerHTML = `
+                    <div class="data-value">${item.value}</div>
+                    <div class="data-label">${item.label}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Search functionality
+        document.getElementById('search-btn').addEventListener('click', function() {
+            const searchValue = document.getElementById('search-input').value.trim();
+            
+            if (searchValue) {
+                // Validate if it's a number
+                if (!/^\d+$/.test(searchValue)) {
+                    showNotification('Please enter a valid number', 3000);
+                    return;
+                }
+                
+                showNotification(`Fetching information for: ${searchValue}`);
+                fetchNumberInfo(searchValue);
+            } else {
+                showNotification('Please enter a phone number', 3000);
+            }
+        });
+
+        // Allow pressing Enter to search
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('search-btn').click();
+            }
+        });
+
+        // Initialize the application
+        function initApp() {
+            loadConfig();
+            
+            // Display sample data on initial load
+            displaySampleData('7676162652');
+        }
+
+        // Start the application
+        initApp();
+    </script>
+</body>
+</html>
